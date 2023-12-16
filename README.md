@@ -34,7 +34,7 @@ $DB_USER = "dbuser";
 $DB_PASS = "dbpass";
 ```
 
-Uzak Sunucya CURL ile ftp bilgilerini girerek yükleme yapmak için 57. satırda ftp bilgilerini girin.
+Uzak sunucuya CURL ile ftp bilgilerini girerek yükleme yapmak için 57. satırda ftp bilgilerini girin.
 ```php
 $FTPHOST = 'ftpaddress';
 $FTPUSER = 'username';
