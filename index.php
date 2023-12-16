@@ -9,6 +9,7 @@
         Versiyon : 1.0.0 (Beta)
 
         TR: Bu betik MySQL veritabanlarınızı yedekler ve isteğe bağlı olarak ftp sunucusuna aktarır.
+        NOT: PAYLAŞIMLI HOSTINGLERDE shell_exec($command); KOMUTU ÇALIŞMAYABİLİR.
 
         Sonraki Geliştirme; 
             Çoklu FTP ve Çoklu Veritabanı yedekleme
