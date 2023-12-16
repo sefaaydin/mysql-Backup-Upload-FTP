@@ -1,0 +1,131 @@
+<?php
+
+    /* *****
+
+        Sefa AYDIN
+
+        İlk yayın tarihi : 16.12.2023
+        Son Güncelleme Tarihi : 16.12.2023 17:50
+        Versiyon : 1.0.0 (Beta)
+
+        TR: Bu betik MySQL veritabanlarınızı yedekler ve isteğe bağlı olarak bunları bir veya daha fazla ftp sunucusuna aktarır.
+        EN: This script backups your MySQL databases and optionally transfer them to one or more ftp server.
+
+        Sonraki Geliştirme; 
+            Çoklu FTP ve Çoklu Veritabanı yedekleme
+            mysqldump özelliklerini özelleştirme.
+            Yedeklenecek veritabanı adını kullanıcının değiştirilmesine izin verme
+            İşlem sonucunda kullanıcıya mesaj metnini değiştirilme özelliği
+
+
+            --dump-date --allow-keywords --add-drop-table --complete-insert --hex-blob --quote-names
+
+    ***** */
+
+    // Güvenlik İçin Sabitler 
+    // Example : https://domain.com/cron/dbBackup.php?KEY_GET1=688787d8f&KEY_GET2=3608bca1e
+
+    define("KEY_GET1", "688787d8f");
+    define("KEY_GET2", "3608bca1e");
+    
+    
+    if ($_GET['KEY_GET1'] != KEY_GET1 || $_GET['KEY_GET2'] != KEY_GET2) {
+        die("hack? bug bounty -> info@email.com");
+    }
+
+    // Durum : Yedekleme hizmetinin aktif etmek için ayarı 1 yapın!
+    $status = 1; // 1 = Aktif, 0 = Pasif
+    if ($status == 1) {
+
+        /*----------------------------------------------------------------
+        //Set defaults
+        //----------------------------------------------------------------*/
+
+            // Set errors & time limit
+            error_reporting(E_ALL);
+            set_time_limit(240);
+
+        /*----------------------------------------------------------------------
+            Aşağıdaki veritabanı ve ftp ayarlarını kendinize göre düzenleyin.
+        //--------------------------------------------------------------------*/
+            $DB_HOST = "localhost";
+            $DB_NAME = "dbname";
+            $DB_USER = "dbuser";
+            $DB_PASS = "dbpass";
+
+            $FTPHOST = 'ftpaddress';
+            $FTPUSER = 'username';
+            $FTPPASS = 'password';
+            $LOCFLDR = __DIR__.'/dumps/'; // __DIR__ -> Ana Klasör, /dumps/ klasörüne .sql dosyası yedeklenecek. Dilerseniz değiştirebilirsiniz.
+            $FTPFLDR = '/backup'; // Veritabanı sql dosyasının Uzak Sunucudaki yolu. Örneğin : /backup
+
+            $zipActive = 0;         // sql yedeğini sıkıştırmak için ayarı 1 yapın! 
+            $uploadFTP = 0;         // Uzak sunucuya yedeği yüklemek için ayarı 1 yapın!
+            $localBackupDelete = 0; // eğer FTP yükleme aktif ise local yedek dosyalarını FTP yüklemesi bittikten sonra silmek için ayarı 1 yapın!
+
+        /*---------------------------------------------------------------------- */
+
+        function mysqlBackupToCurlAndFTP($host, $username, $password, $database, $zipActive, $uploadFTP, $localBackupDelete, $ftpHost, $ftpUsername, $ftpPassword, $localFolders, $ftpDirectory) {
+            try {
+
+                // Veritabanı yedeği al
+                $backupFileName = $database . '_' . date('Ymd_His') . '.sql';
+                $backupFilePath = $localFolders. $backupFileName;
+
+                $command = "mysqldump --host=$host --user=$username --password=$password --dump-date --allow-keywords --add-drop-table --complete-insert --hex-blob --quote-names $database > $backupFilePath";
+                shell_exec($command);
+
+                if($zipActive == 1) {
+
+                    // .zip dosyasını oluştur
+                    $zipFileName = $backupFileName . '.zip';
+                    $zipFilePath = $localFolders. $zipFileName;
+
+                    $zip = new ZipArchive();
+                    $zip->open($zipFilePath, ZipArchive::CREATE);
+                    $zip->addFile($backupFilePath, $backupFileName);
+                    $zip->close();
+
+                }
+
+                if($uploadFTP == 1){
+
+                    // Curl ile dosyayı FTP'ye yükle
+                    $ftpUrl = "ftp://$ftpUsername:$ftpPassword@$ftpHost/$ftpDirectory/$zipFileName";
+                    $ch = curl_init();
+                    $fp = fopen($zipFilePath, 'r');
+
+                    curl_setopt($ch, CURLOPT_URL, $ftpUrl);
+                    curl_setopt($ch, CURLOPT_UPLOAD, 1);
+                    curl_setopt($ch, CURLOPT_INFILE, $fp);
+                    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($zipFilePath));
+
+                    $result = curl_exec($ch);
+
+                    // Curl işlemini kapat
+                    curl_close($ch);
+                    fclose($fp);
+
+                    if($localBackupDelete == 1){
+
+                        // Dosyaları temizle
+                        unlink($backupFilePath);
+                        unlink($zipFilePath);
+    
+                    }
+                }
+
+                if ($result) {
+                    echo "OK";
+                } else {
+                    echo "Error!";
+                }
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
+            }
+        }
+
+        // Örnek kullanım
+        mysqlBackupToCurlAndFTP($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME, $zipActive, $uploadFTP, $localBackupDelete, $FTPHOST, $FTPUSER, $FTPPASS, $LOCFLDR, $FTPFLDR);
+
+    }
