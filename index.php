@@ -38,39 +38,39 @@
         die("hack? bug bounty -> info@email.com");
     }
 
-    // Durum : Yedekleme hizmetinin aktif etmek için ayarı 1 yapın!
-    $status = 1; // 1 = Aktif, 0 = Pasif
-    if ($status == 1) {
+    /*----------------------------------------------------------------
+    //Set defaults
+    //----------------------------------------------------------------*/
 
-        /*----------------------------------------------------------------
-        //Set defaults
-        //----------------------------------------------------------------*/
+    // Set errors & time limit
+    error_reporting(E_ALL);
+    set_time_limit(240);
 
-            // Set errors & time limit
-            error_reporting(E_ALL);
-            set_time_limit(240);
+    /*----------------------------------------------------------------------
+        Aşağıdaki veritabanı ve ftp ayarlarını kendinize göre düzenleyin.
+    //--------------------------------------------------------------------*/
+    $DB_HOST = "localhost";
+    $DB_NAME = "dbname";
+    $DB_USER = "dbuser";
+    $DB_PASS = "dbpass";
 
-        /*----------------------------------------------------------------------
-            Aşağıdaki veritabanı ve ftp ayarlarını kendinize göre düzenleyin.
-        //--------------------------------------------------------------------*/
-            $DB_HOST = "localhost";
-            $DB_NAME = "dbname";
-            $DB_USER = "dbuser";
-            $DB_PASS = "dbpass";
+    $FTPHOST = 'ftpaddress';
+    $FTPUSER = 'username';
+    $FTPPASS = 'password';
+    $LOCFLDR = __DIR__.'/dumps/'; // __DIR__ -> Ana Klasör, /dumps/ klasörüne .sql dosyası yedeklenecek. Dilerseniz değiştirebilirsiniz.
+    $FTPFLDR = '/backup'; // Veritabanı sql dosyasının Uzak Sunucudaki yolu. Örneğin : /backup
 
-            $FTPHOST = 'ftpaddress';
-            $FTPUSER = 'username';
-            $FTPPASS = 'password';
-            $LOCFLDR = __DIR__.'/dumps/'; // __DIR__ -> Ana Klasör, /dumps/ klasörüne .sql dosyası yedeklenecek. Dilerseniz değiştirebilirsiniz.
-            $FTPFLDR = '/backup'; // Veritabanı sql dosyasının Uzak Sunucudaki yolu. Örneğin : /backup
+    $zipActive = 0;         // sql yedeğini sıkıştırmak için ayarı 1 yapın! 
+    $uploadFTP = 0;         // Uzak sunucuya yedeği yüklemek için ayarı 1 yapın!
+    $localBackupDelete = 0; // eğer FTP yükleme aktif ise local yedek dosyalarını FTP yüklemesi bittikten sonra silmek için ayarı 1 yapın!
 
-            $zipActive = 0;         // sql yedeğini sıkıştırmak için ayarı 1 yapın! 
-            $uploadFTP = 0;         // Uzak sunucuya yedeği yüklemek için ayarı 1 yapın!
-            $localBackupDelete = 0; // eğer FTP yükleme aktif ise local yedek dosyalarını FTP yüklemesi bittikten sonra silmek için ayarı 1 yapın!
+    /*---------------------------------------------------------------------- */
 
-        /*---------------------------------------------------------------------- */
+    function mysqlBackupToCurlAndFTP($host, $username, $password, $database, $ftpHost, $ftpUsername, $ftpPassword, $localFolders, $ftpDirectory, $zipActive, $uploadFTP, $localBackupDelete) {
+        // Durum : Yedekleme hizmetinin aktif etmek için ayarı 1 yapın!
+        $status = 1; // 1 = Aktif, 0 = Pasif
 
-        function mysqlBackupToCurlAndFTP($host, $username, $password, $database, $zipActive, $uploadFTP, $localBackupDelete, $ftpHost, $ftpUsername, $ftpPassword, $localFolders, $ftpDirectory) {
+        if ($status == 1) {
             try {
 
                 // Veritabanı yedeği al
@@ -121,16 +121,20 @@
                 }
 
                 if ($result) {
-                    echo "OK";
+                    $message = "OK";
+                    return $message;
                 } else {
-                    echo "Error!";
+                    $message = "Error!";
+                    return $message;
                 }
             } catch (PDOException $e) {
                 echo "Error: " . $e->getMessage();
             }
+        }else{
+            $message = "Yedekleme pasif durumda.";
+            return $message;
         }
-
-        // Örnek kullanım
-        mysqlBackupToCurlAndFTP($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME, $zipActive, $uploadFTP, $localBackupDelete, $FTPHOST, $FTPUSER, $FTPPASS, $LOCFLDR, $FTPFLDR);
-
     }
+
+    // Örnek kullanım
+    mysqlBackupToCurlAndFTP($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME, $FTPHOST, $FTPUSER, $FTPPASS, $LOCFLDR, $FTPFLDR, $zipActive, $uploadFTP, $localBackupDelete);
