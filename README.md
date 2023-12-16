@@ -39,8 +39,8 @@ Uzak sunucuya CURL ile ftp bilgilerini girerek yükleme yapmak için 57. satırd
 $FTPHOST = 'ftpaddress';
 $FTPUSER = 'username';
 $FTPPASS = 'password';
-$LOCFLDR = __DIR__.'/dumps/';
-$FTPFLDR = '/backup';
+$LOCFLDR = __DIR__.'/dumps/'; // __DIR__ -> Ana Klasör, /dumps/ klasörüne .sql dosyası yedeklenecek. Dilerseniz değiştirebilirsiniz.
+$FTPFLDR = '/backup'; // Veritabanı sql dosyasının Uzak Sunucudaki yolu. Örneğin : /backup
 ```
 
 Özelleştirme için 63. satırdaki ayarları yapın.
