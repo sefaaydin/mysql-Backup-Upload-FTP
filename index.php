@@ -8,8 +8,7 @@
         Son Güncelleme Tarihi : 16.12.2023 17:50
         Versiyon : 1.0.0 (Beta)
 
-        TR: Bu betik MySQL veritabanlarınızı yedekler ve isteğe bağlı olarak bunları bir veya daha fazla ftp sunucusuna aktarır.
-        EN: This script backups your MySQL databases and optionally transfer them to one or more ftp server.
+        TR: Bu betik MySQL veritabanlarınızı yedekler ve isteğe bağlı olarak ftp sunucusuna aktarır.
 
         Sonraki Geliştirme; 
             Çoklu FTP ve Çoklu Veritabanı yedekleme
@@ -17,9 +16,14 @@
             Yedeklenecek veritabanı adını kullanıcının değiştirilmesine izin verme
             İşlem sonucunda kullanıcıya mesaj metnini değiştirilme özelliği
 
-
             --dump-date --allow-keywords --add-drop-table --complete-insert --hex-blob --quote-names
-
+            Bu komutun açıklamaları:
+            --dump-date : Yedek alma işlemi tarihi
+            --allow-keywords: MySQL anahtar kelimelerine izin verir.
+            --add-drop-table: Tabloları oluşturmadan önce varsa düşürür (drop) ve yeniden oluşturur.
+            --complete-insert: INSERT ifadesini kullanarak veriyi eksiksiz olarak ekler.
+            --hex-blob: BLOB sütunları için hexadecimal formatı kullanır.
+            --quote-names: Tablo ve sütun isimlerini alıntılar içine alır.
     ***** */
 
     // Güvenlik İçin Sabitler 
